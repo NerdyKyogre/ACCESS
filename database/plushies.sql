@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS plushies.registry AS (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     species TEXT,
+    colour TEXT,
     pronouns TEXT,
     imagePath TEXT UNIQUE,
     heightIn SMALLINT,
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS plushies.registry AS (
 CREATE PROCEDURE IF NOT EXISTS plushies.enterPlushie(
     _name TEXT,
     _species TEXT,
+    _colour TEXT,
     _pronouns TEXT,
     _imagePath TEXT,
     _heightIn SMALLINT,
@@ -26,6 +28,7 @@ BEGIN
         INSERT INTO plushies.registry (
             name,
             species,
+            colour,
             pronouns,
             imagePath,
             heightIn,
@@ -33,6 +36,7 @@ BEGIN
         VALUES(
             _name,
             _species,
+            _colour,
             _pronouns,
             _imagePath,
             _heightIn,
@@ -42,6 +46,7 @@ BEGIN
         SET
             name = _name,
             species = _species,
+            colour = _colour,
             pronouns = _pronouns,
             imagePath = _imagePath,
             heightIn = _heightIn,
@@ -63,6 +68,7 @@ BEGIN
             id,
             name,
             species,
+            colour,
             pronouns,
             imagePath,
             heightIn,
