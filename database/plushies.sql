@@ -7,12 +7,12 @@ CREATE TABLE IF NOT EXISTS plushies.registry AS (
     species TEXT,
     colour TEXT,
     pronouns TEXT,
-    imagePath TEXT UNIQUE,
+    imagePath TEXT UNIQUE NULLS DISTINCT,
     heightIn SMALLINT,
     bio TEXT);
 
 -- Updates an existing entry if an ID is passed, otherwise creates a new one
-CREATE PROCEDURE IF NOT EXISTS plushies.enterPlushie(
+CREATE OR REPLACE PROCEDURE plushies.enterPlushie(
     _name TEXT,
     _species TEXT,
     _colour TEXT,
@@ -35,9 +35,9 @@ BEGIN
             bio)
         VALUES(
             _name,
-            _species,
-            _colour,
-            _pronouns,
+            LOWER(_species),
+            LOWER(_colour),
+            LOWER(_pronouns),
             _imagePath,
             _heightIn,
             _bio);
@@ -45,9 +45,9 @@ BEGIN
         UPDATE plushies.registry
         SET
             name = _name,
-            species = _species,
-            colour = _colour,
-            pronouns = _pronouns,
+            species = LOWER(_species),
+            colour = LOWER(_colour),
+            pronouns = LOWER(_pronouns),
             imagePath = _imagePath,
             heightIn = _heightIn,
             bio = _bio
@@ -57,8 +57,17 @@ END; $$;
 
 
 -- Gets the data for a given entry, or returns the full table if no ID specified
-CREATE FUNCTION IF NOT EXISTS plushies.getPlushie(
+CREATE OR REPLACE FUNCTION plushies.getPlushie(
     _id INTEGER = NULL)
+RETURNS TABLE (
+    id INTEGER,
+    name TEXT,
+    species TEXT,
+    colour TEXT,
+    pronouns TEXT,
+    imagePath TEXT,
+    heightIn SMALLINT,
+    bio TEXT)
 LANGUAGE plpgsql STABLE STRICT PARALLEL SAFE
 AS $$
 BEGIN
@@ -79,5 +88,26 @@ BEGIN
             registry.id = _id;
 
 END; $$;
+
+-- Populates filter info for search page, saving this work on the site side
+CREATE OR REPLACE FUNCTION plushies.getFilterValues()
+RETURNS JSONB
+LANGUAGE plpgsql STABLE STRICT PARALLEL SAFE
+AS $$
+BEGIN
+
+    RETURN QUERY
+        SELECT
+            JSONB_BUILD_OBJECT(
+                'height', JSONB_BUILD_OBJECT(
+                    'max', MAX(registry.heightIn),
+                    'min', MIN(registry.heightIn)),
+                'species', JSONB_AGG(DISTINCT registry.species),
+                'colour', JSONB_AGG(DISTINCT registry.colour),
+                'pronouns', JSONB_AGG(DISTINCT registry.pronouns))
+        FROM plushies.registry;
+
+END; $$;
+
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA plushies TO apache;
