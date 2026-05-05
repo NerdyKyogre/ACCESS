@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS plushies.registry AS (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     species TEXT,
-    colour TEXT,
+    colour TEXT[],
     pronouns TEXT,
     imagePath TEXT UNIQUE NULLS DISTINCT,
     heightIn SMALLINT,
@@ -36,7 +36,7 @@ BEGIN
         VALUES(
             _name,
             LOWER(_species),
-            LOWER(_colour),
+            LOWER(TRIM(STRING_TO_ARRAY(_colour, ', '))),
             LOWER(_pronouns),
             _imagePath,
             _heightIn,
@@ -76,7 +76,7 @@ BEGIN
             id,
             name,
             species,
-            colour,
+            ARRAY_TO_STRING(colour, ', '),
             pronouns,
             imagePath,
             heightIn,
@@ -102,7 +102,7 @@ BEGIN
                     'max', MAX(registry.heightIn),
                     'min', MIN(registry.heightIn)),
                 'species', JSONB_AGG(DISTINCT registry.species),
-                'colour', JSONB_AGG(DISTINCT registry.colour),
+                'colour', JSONB_AGG(DISTINCT UNNEST(registry.colour)),
                 'pronouns', JSONB_AGG(DISTINCT registry.pronouns))
         FROM plushies.registry;
 
