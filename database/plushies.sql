@@ -55,7 +55,6 @@ BEGIN
 
 END; $$;
 
-
 -- Gets the data for a given entry, or returns the full table if no ID specified
 CREATE OR REPLACE FUNCTION plushies.getPlushie(
     _id INTEGER = NULL)
@@ -108,6 +107,5 @@ BEGIN
         FROM plushies.registry;
 
 END; $$;
-
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA plushies TO apache;
