@@ -1,7 +1,7 @@
 CREATE SCHEMA IF NOT EXISTS plushies;
 GRANT USAGE ON SCHEMA plushies TO apache;
 
-CREATE TABLE IF NOT EXISTS plushies.registry AS (
+CREATE TABLE IF NOT EXISTS plushies.registry (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     species TEXT,
@@ -24,6 +24,7 @@ CREATE OR REPLACE PROCEDURE plushies.enterPlushie(
 LANGUAGE plpgsql
 AS $$
 BEGIN
+
     IF _id IS NULL THEN
         INSERT INTO plushies.registry (
             name,
@@ -36,7 +37,7 @@ BEGIN
         VALUES(
             _name,
             LOWER(_species),
-            LOWER(TRIM(STRING_TO_ARRAY(_colour, ', '))),
+            STRING_TO_ARRAY(LOWER(_colour), ', '),
             LOWER(_pronouns),
             _imagePath,
             _heightIn,
@@ -46,12 +47,13 @@ BEGIN
         SET
             name = _name,
             species = LOWER(_species),
-            colour = LOWER(_colour),
+            colour = STRING_TO_ARRAY(LOWER(_colour), ', '),
             pronouns = LOWER(_pronouns),
-            imagePath = _imagePath,
+            imagePath = COALESCE(_imagePath, imagePath),
             heightIn = _heightIn,
             bio = _bio
         WHERE registry.id = _id;
+    END IF;
 
 END; $$;
 
@@ -73,14 +75,14 @@ BEGIN
 
     RETURN QUERY
         SELECT
-            id,
-            name,
-            species,
-            ARRAY_TO_STRING(colour, ', '),
-            pronouns,
-            imagePath,
-            heightIn,
-            bio
+            registry.id,
+            registry.name,
+            registry.species,
+            ARRAY_TO_STRING(registry.colour, ', '),
+            registry.pronouns,
+            registry.imagePath,
+            registry.heightIn,
+            registry.bio
         FROM plushies.registry
         WHERE
             _id IS NULL OR
@@ -95,7 +97,7 @@ LANGUAGE plpgsql STABLE STRICT PARALLEL SAFE
 AS $$
 BEGIN
 
-    RETURN QUERY
+    RETURN(
         SELECT
             JSONB_BUILD_OBJECT(
                 'height', JSONB_BUILD_OBJECT(
@@ -104,8 +106,9 @@ BEGIN
                 'species', JSONB_AGG(DISTINCT registry.species),
                 'colour', JSONB_AGG(DISTINCT UNNEST(registry.colour)),
                 'pronouns', JSONB_AGG(DISTINCT registry.pronouns))
-        FROM plushies.registry;
+        FROM plushies.registry);
 
 END; $$;
 
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA PLUSHIES TO apache;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA plushies TO apache;
