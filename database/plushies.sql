@@ -69,7 +69,7 @@ RETURNS TABLE (
     imagePath TEXT,
     heightIn SMALLINT,
     bio TEXT)
-LANGUAGE plpgsql STABLE STRICT PARALLEL SAFE
+LANGUAGE plpgsql STABLE PARALLEL SAFE
 AS $$
 BEGIN
 
@@ -85,8 +85,7 @@ BEGIN
             registry.bio
         FROM plushies.registry
         WHERE
-            _id IS NULL OR
-            registry.id = _id;
+            registry.id = COALESCE(_id, registry.id);
 
 END; $$;
 
@@ -104,9 +103,10 @@ BEGIN
                     'max', MAX(registry.heightIn),
                     'min', MIN(registry.heightIn)),
                 'species', JSONB_AGG(DISTINCT registry.species),
-                'colour', JSONB_AGG(DISTINCT UNNEST(registry.colour)),
+                'colour', JSONB_AGG(DISTINCT _colour),
                 'pronouns', JSONB_AGG(DISTINCT registry.pronouns))
-        FROM plushies.registry);
+        FROM plushies.registry
+        CROSS JOIN LATERAL UNNEST(registry.colour) AS _colour);
 
 END; $$;
 

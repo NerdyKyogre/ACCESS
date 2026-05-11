@@ -7,7 +7,6 @@ if($id)
     $cursor = \accessCore\getPGConn();
     $result = pg_query_params($cursor, "SELECT * FROM plushies.getPlushie($1)", [$id]) or die('Query failed: ' . pg_last_error());
     $info = pg_fetch_object($result);
-    error_log(print_r($info, true));
     pg_free_result($result);
     pg_close($cursor);
 }
