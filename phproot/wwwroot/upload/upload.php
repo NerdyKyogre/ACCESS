@@ -3,8 +3,6 @@ require_once('../../src/helpers.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST')
     die("This script may only be called using a POST request");
-if ($_FILES["imageUpload"]["error"] !== 0)
-    die("Failed to upload image. Error code: " . $_FILES["imageUpload"]["error"]);
 
 $id = $_POST['id'] ?: null;
 $name = $_POST['name'] ?: null;
@@ -14,11 +12,18 @@ $pronouns = $_POST['pronouns'] ?: null;
 $height = $_POST['height'] ?: null;
 $bio = $_POST['bio'] ?: null;
 
-$imageName = basename($_FILES['imageUpload']['name']);
-$imageExt = pathinfo($imageName, PATHINFO_EXTENSION);
-$newImageName = uniqid() . "." . $imageExt;
-$targetPath = \accessCore\CONFIG['IMG_PATH'] . "/" . $newImageName;
-move_uploaded_file($_FILES["imageUpload"]["tmp_name"], $targetPath) or die("Failed to upload image.");
+if($_FILES['imageUpload']['name'])
+{
+    if ($_FILES["imageUpload"]["error"] !== 0)
+        die("Failed to upload image. Error code: " . $_FILES["imageUpload"]["error"]);
+    $imageName = basename($_FILES['imageUpload']['name']);
+    $imageExt = pathinfo($imageName, PATHINFO_EXTENSION);
+    $newImageName = uniqid() . "." . $imageExt;
+    $targetPath = \accessCore\CONFIG['IMG_PATH'] . "/" . $newImageName;
+    move_uploaded_file($_FILES["imageUpload"]["tmp_name"], $targetPath) or die("Failed to upload image.");
+}
+else
+    $newImageName = null;
 
 $cursor = \accessCore\getPGConn(false);
 pg_query_params(
@@ -35,4 +40,7 @@ pg_query_params(
         $id
     ]
 ) or die("Upload failed.");
+
+header("Location: /");
+exit();
 ?>

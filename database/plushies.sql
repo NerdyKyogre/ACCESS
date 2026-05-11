@@ -85,7 +85,8 @@ BEGIN
             registry.bio
         FROM plushies.registry
         WHERE
-            registry.id = COALESCE(_id, registry.id);
+            registry.id = COALESCE(_id, registry.id)
+        ORDER BY registry.name ASC;
 
 END; $$;
 

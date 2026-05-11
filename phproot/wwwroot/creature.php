@@ -33,12 +33,12 @@ pg_close($cursor);
                         </div>
                     </header>
                 </section>
-                <header>
-                    <h3>About Me</h3>
+                <header class="major">
+                    <h2>About Me</h2>
                 </header>
                 <p><strong>Species: </strong><?= $info->species ?: 'Unknown' ?></p>
                 <p><strong>Colour(s): </strong><?= $info->colour ?: 'Unknown' ?></p>
-                <p><strong>Height: </strong><?= $info->height ? $info->height . ' inches' : 'Unknown' ?></p>
+                <p><strong>Height: </strong><?= $info->heightin ? $info->heightin . ' inches' : 'Unknown' ?></p>
                 <?php
 if($info->bio)
 { ?>
@@ -47,7 +47,8 @@ if($info->bio)
     $parsedown->setSafeMode(true);
     echo $parsedown->text($info->bio);
 } ?>
-                <a href="/upload/?id=<?= $id ?>" class="button">Edit this friend</a>
+                <a href="/upload/?id=<?= $id ?>" class="button">Edit Friend</a>
+                <a href="/" class="button alt">Back to Home</a>
             </article>
         </div>
     </section>
