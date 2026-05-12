@@ -82,6 +82,7 @@ foreach(FILTER_ATTRS as $attr)
                             <div class="sys-filter-checkboxes" data-attribute="<?= $attr ?>">
                                 <h3 style="margin-bottom: 10px;"><?= ucfirst($attr) ?></h3>
 <?php
+        sort($filterValues[$attr]);
         foreach($filterValues[$attr] as $value)
         { ?>
                                 <input type="checkbox" class="sys-filter-checkbox" style="appearance: revert; accent-color: #d52349;" id="<?= $value ?>" name="<?= $value ?>" value="<?= $value ?>">
