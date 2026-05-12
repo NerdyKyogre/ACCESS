@@ -16,11 +16,13 @@ function checkIds() {
     }
 }
 
-document.getElementById('sys-search').addEventListener('change', (event) => {
-    const result = fuse.search(event.target.value);
-    fusedIds = result.map(entry => entry.item.id);
+document.querySelectorAll('.sys-search').forEach(bar => {
+    bar.addEventListener('change', (event) => {
+        const result = fuse.search(event.target.value);
+        fusedIds = result.map(entry => entry.item.id);
 
-    checkIds();
+        checkIds();
+    });
 });
 
 const filters = document.querySelectorAll('.sys-filter-checkboxes .sys-filter-checkbox, .sys-filter-sliders div input');
@@ -47,21 +49,19 @@ filters.forEach(filter => {
         filteredIds = []
         entryLoop:
         for(const entry of searchEntries) {
-            let good = true;
             for(const [attribute, values] of Object.entries(selectedAttributes))
                 if(attribute == "colour") {
                     if(!values.some(value => entry[attribute].includes(value)))
-                        good = false;
+                        continue entryLoop;
                 }
                 else if(!values.includes(entry[attribute]))
-                    good = false;
+                    continue entryLoop;
 
             for(const [attribute, range] of Object.entries(selectedRanges))
                 if(Number(entry[attribute]) < range["min"] || Number(entry[attribute]) > range["max"])
-                    good = false;
+                    continue entryLoop;
 
-            if(good)
-                filteredIds.push(entry.id);
+            filteredIds.push(entry.id);
         }
 
         checkIds();

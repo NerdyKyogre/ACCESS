@@ -35,7 +35,7 @@ define('FILTER_ATTRS', array_keys($filterValues));
                             <header class="major">
                                 <h2><a>Filter and Search</a></h2>
                             </header>
-                            <input type="text" id="sys-search" placeholder="Search for a friend...">
+                            <input type="text" class="sys-search" placeholder="Search for a friend...">
                             <br>
                             <div class="sys-filter-sliders" data-attribute="heightin">
                                 <h3 style="margin-bottom: 10px;">Height</h3>
