@@ -11,7 +11,6 @@ pg_free_result($result);
 pg_close($cursor);
 
 define('FILTER_ATTRS', array_keys($filterValues));
-print_r($filterValues['height']['max']);
 ?>
 
 <html>
